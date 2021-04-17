@@ -1,0 +1,2 @@
+## 4/16/2021
+This project has been going on for a bit before this log was created, but I'm making this now since we've finally gotten to the coding portion of the project. Today I created a GitHub repo for this project and am beginning to clean and transform the many csv files we have for the proejct into a single, useable csv. This single csv file needs to be formatted in such a way that it's easy for me and Abhinav to use it in a number of models to predict life expectancy and healthy life expectancy. 
