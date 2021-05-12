@@ -1,0 +1,869 @@
+---
+title: "Test Project IS 517"
+author: "Abhinav Choudhry"
+date: "May 2, 2021"
+output: pdf_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+So it begins...
+```{r}
+library(ISLR)
+econtrain<-read.csv("C:\\Users\\TCI\\Documents\\training_economic_full.csv")
+econtest<-read.csv("C:\\Users\\TCI\\Documents\\test_economic_full.csv")
+trainfull<-read.csv("C:\\Users\\TCI\\Documents\\training_small_cleaner_with_tobacco_BMI_TechFuel.csv")
+testfull<-read.csv("C:\\Users\\TCI\\Documents\\test_small_cleaner_with_tobacco_BMI_TechFuel.csv")
+
+summary(testfull)
+#Creating Tobacco excluding sets for some models
+trainmain<-trainfull
+trainmain$Tobacco<-NULL
+testmain<-testfull
+testmain$Tobacco<-NULL
+
+summary(trainfull)
+#fix(testfull)
+#Creating data sets devoid of NAs
+
+trainfullNA<-na.omit(trainfull)
+row.names(trainfullNA)=1:nrow(trainfullNA)
+dim(trainfull)
+dim(trainfullNA)
+summary(trainfullNA)
+
+trainmainNA<-na.omit(trainmain)
+row.names(trainmainNA)=1:nrow(trainmainNA)
+
+testfullNA<-na.omit(testfull)
+row.names(testfullNA)=1:nrow(testfullNA)
+testmainNA<-na.omit(testmain)
+row.names(testmainNA)=1:nrow(testmainNA)
+econtrainNA<-na.omit(econtrain)
+row.names(econtrainNA)=1:nrow(econtrainNA)
+dim(testfull)
+dim(testfullNA)
+
+dim(econtrain)
+dim(econtrainNA)
+summary(econtrainNA)
+
+econtestNA<-na.omit(econtest)
+row.names(econtestNA)=1:nrow(econtestNA)
+dim(econtest)
+dim(econtestNA)
+```
+
+##Linear regression on Economic Data
+
+###For HALE
+```{r}
+library(MLmetrics) #for MAPE-Mean Absolute Percentage Regression Loss
+# set.seed(26)
+# Both GDP and percentage of GDP spent on health:all economic indicators
+linregecon<-lm(HALE~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA)
+summary(linregecon)
+print("Training error of Economic indicators on Healthy Adjusted Life Expectancy are:")
+predictlinregecon = predict(linregecon, newdata = econtrainNA)
+MAPE(econtrainNA$HALE, predictlinregecon)
+print("Test error of Economic indicators on Healthy Adjusted Life Expectancy are:")
+predictlinregecon = predict(linregecon, newdata = econtestNA)
+MAPE(econtestNA$HALE, predictlinregecon)
+
+# Just GDP
+linregecon<-lm(HALE~GDP_currentUSD,data=econtrainNA)
+summary(linregecon)
+print("Training error of just GDP on Healthy Adjusted Life Expectancy are:")
+predictlinregecon = predict(linregecon, newdata = econtrainNA)
+MAPE(econtrainNA$HALE, predictlinregecon)
+print("Test error of just GDP on Healthy Adjusted Life Expectancy are:")
+predictlinregecon = predict(linregecon, newdata = econtestNA)
+MAPE(econtestNA$HALE, predictlinregecon)
+
+# Just Health expenditure as GDP percentage
+linregecon<-lm(HALE~HealthExpGDPperc,data=econtrainNA)
+summary(linregecon)
+print("Training error of just Health Expenditure on Healthy Adjusted Life Expectancy are:")
+predictlinregecon = predict(linregecon, newdata = econtrainNA)
+MAPE(econtrainNA$HALE, predictlinregecon)
+print("Test error of just Health Expenditure on Healthy Adjusted Life Expectancy are:")
+predictlinregecon = predict(linregecon, newdata = econtestNA)
+MAPE(econtestNA$HALE, predictlinregecon)
+# #
+```
+Health expenditure as percentage of GDP is better than GDP as an economic indicator and GDP is not significant when both GDP and health spending are regressed together. However, the R-square is only 7.4% 
+
+### For Life Expectancy at Birth
+```{r}
+# Both GDP and percentage of GDP spent on health:all economic indicators
+linregecon<-lm(LifeExpectancy~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA)
+summary(linregecon)
+print("Training error of Economic indicators on Life Expectancy at birth are:")
+predictlinregecon = predict(linregecon, newdata = econtrainNA)
+MAPE(econtrainNA$LifeExpectancy, predictlinregecon)
+print("Test error of Economic indicators on Life Expectancy at birth are:")
+predictlinregecon = predict(linregecon, newdata = econtestNA)
+MAPE(econtestNA$LifeExpectancy, predictlinregecon)
+
+# Just GDP
+linregecon<-lm(LifeExpectancy~GDP_currentUSD,data=econtrainNA)
+summary(linregecon)
+print("Training error of just GDP on Life Expectancy at birth are:")
+predictlinregecon = predict(linregecon, newdata = econtrainNA)
+MAPE(econtrainNA$LifeExpectancy, predictlinregecon)
+print("Test error of just GDP on Life Expectancy at birth are:")
+predictlinregecon = predict(linregecon, newdata = econtestNA)
+MAPE(econtestNA$LifeExpectancy, predictlinregecon)
+
+# Just Health expenditure as GDP percentage
+linregecon<-lm(LifeExpectancy~HealthExpGDPperc,data=econtrainNA)
+summary(linregecon)
+print("Training error of just Health Expenditure on Life Expectancy at birth are:")
+predictlinregecon = predict(linregecon, newdata = econtrainNA)
+MAPE(econtrainNA$LifeExpectancy, predictlinregecon)
+print("Test error of just Health Expenditure on Life Expectancy at birth are:")
+predictlinregecon = predict(linregecon, newdata = econtestNA)
+MAPE(econtestNA$LifeExpectancy, predictlinregecon)
+```
+Error rates are similar as for life expectancy but Health Expenditure as a percentage of GDP exerts the most influence and is much more influential than GDP 
+## Linear regression of Health Parameters
+
+### Linear Regression of Health Infrastructure
+#### on HALE
+```{r}
+linreghealth<-lm(HALE~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA)
+summary(linreghealth)
+print("Training error of Health Infrastructure on HALE are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictlinreghealth)
+
+linreghealth<-lm(HALE~DrinkingWater,data=trainmainNA)
+summary(linreghealth)
+print("Training error of proportion of population using basic drinking water services on HALE are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictlinreghealth)
+
+linreghealth<-lm(HALE~BasicSanitization,data=trainmainNA)
+summary(linreghealth)
+print("Training error of proportion of population having availability of basic sanitization facilities on HALE are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictlinreghealth)
+
+linreghealth<-lm(HALE~CleanTechFuel,data=trainmainNA)
+summary(linreghealth)
+print("Training error of proportion of population with primary reliance on clean fuels and technologies on HALE are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictlinreghealth)
+```
+#### Health Infra On Life Expectancy
+```{r}
+linreghealth<-lm(LifeExpectancy~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA)
+summary(linreghealth)
+print("Training error of Health Infrastructure on Life Expectancy at Birth are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictlinreghealth)
+
+linreghealth<-lm(LifeExpectancy~DrinkingWater,data=trainmainNA)
+summary(linreghealth)
+print("Training error of proportion of population using basic drinking water services on Life Expectancy at Birth are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictlinreghealth)
+
+linreghealth<-lm(LifeExpectancy~BasicSanitization,data=trainmainNA)
+summary(linreghealth)
+print("Training error of proportion of population having availability of basic sanitization facilities on Life Expectancy at Birth are:")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictlinreghealth)
+
+linreghealth<-lm(LifeExpectancy~CleanTechFuel,data=trainmainNA)
+summary(linreghealth)
+print("Training error of proportion of population with primary reliance on clean fuels and technologies non Life Expectancy at Birth are :")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictlinreghealth)
+```
+The error rates do not differ significantly between HALE and life expectancy.
+
+###Linear Regression of Health Behaviour 
+#### On HALE
+```{r}
+# Both GDP and percentage of GDP spent on health:all health behaviours
+linreghealth<-lm(HALE~Alcohol+Tobacco+BMI30Plus,data=trainfullNA)
+summary(linreghealth)
+print("Training error of Health Behaviours on HALE are:")
+predictlinreghealth = predict(linreghealth, newdata = trainfullNA)
+MAPE(trainfullNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictlinreghealth)
+
+# Just Alcohol
+linreghealth<-lm(HALE~Alcohol,data=trainmainNA)
+summary(linreghealth)
+print("Training error of Alcohol on HALE are:")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictlinreghealth)
+
+# Just Tobacco
+linreghealth<-lm(HALE~Tobacco,data=trainfullNA)
+summary(linreghealth)
+print("Training error of Tobacco on HALE are:")
+predictlinreghealth = predict(linreghealth, newdata = trainfullNA)
+MAPE(trainfullNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictlinreghealth)
+
+
+# Just High BMI (Overweight and Obesity)
+linreghealth<-lm(HALE~BMI30Plus,data=trainmainNA)
+summary(linreghealth)
+print("Training error of obesity and overweight on HALE are:")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictlinreghealth)
+```
+#### Health Behaviour On Life Expectancy at birth
+```{r}
+# All health behaviours
+linreghealth<-lm(LifeExpectancy~Alcohol+Tobacco+BMI30Plus,data=trainfullNA)
+summary(linreghealth)
+print("Training error of Health Behaviours on Life expectancy at birth are:")
+predictlinreghealth = predict(linreghealth, newdata = trainfullNA)
+MAPE(trainfullNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictlinreghealth)
+
+# Just Alcohol
+linreghealth<-lm(LifeExpectancy~Alcohol,data=trainmainNA)
+summary(linreghealth)
+print("Training error of Alcohol on LifeExpectancy at birth are:")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictlinreghealth)
+
+# Just Tobacco
+linreghealth<-lm(LifeExpectancy~Tobacco,data=trainfullNA)
+summary(linreghealth)
+print("Training error of tobacco on LifeExpectancy at birth are:")
+predictlinreghealth = predict(linreghealth, newdata = trainfullNA)
+MAPE(trainfullNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictlinreghealth)
+
+# Just High BMI (Overweight and Obesity)
+linreghealth<-lm(LifeExpectancy~BMI30Plus,data=trainmainNA)
+summary(linreghealth)
+print("Training error of obesity and overweight on LifeExpectancy at birth are:")
+predictlinreghealth = predict(linreghealth, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictlinreghealth)
+```
+### Health Infrastructure and Behaviour Together
+```{r}
+linreghealth<-lm(HALE~Alcohol+Tobacco+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA)
+summary(linreghealth)
+print("Training error of Health Behaviours+Health Infrastructure on HALE are:")
+predictlinreghealth = predict(linreghealth, newdata = trainfullNA)
+MAPE(trainfullNA$HALE, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictlinreghealth)
+
+linreghealth<-lm(LifeExpectancy~Alcohol+Tobacco+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA)
+summary(linreghealth)
+print("Training error of Health Behaviours+Health Infrastructure on Life expectancy at birth are:")
+predictlinreghealth = predict(linreghealth, newdata = trainfullNA)
+MAPE(trainfullNA$LifeExpectancy, predictlinreghealth)
+print("Test error:")
+predictlinreghealth = predict(linreghealth, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictlinreghealth)
+```
+The regression shows health infrastructure parameters to be more significant with drinking water being the most salient and basic sanitization and clean techmnology and fuel use also being significant at the 95% confidence level. Obesity is significant at the 99% confidence level.
+The training and test errors are impressive at only 4.20% and 4.23% respectively.
+
+## LASSO 
+#### For HALE
+```{r}
+trainlasso<-trainfullNA
+trainlasso$Location<-trainlasso$LifeExpectancy<-NULL #Removing dependent variables and non-numeric values
+set.seed(32)
+library(glmnet)
+x=model.matrix(HALE~.,trainlasso)
+y=trainlasso$HALE
+grid=10^seq(10,-2,length=100)
+lasso.mod=glmnet(x,y,alpha=1,lambda=grid)
+dim(coef(lasso.mod))
+plot(lasso.mod)
+cv.out=cv.glmnet(x,y,alpha=1)
+plot(cv.out)
+bestlam=cv.out$lambda.min
+lasso.pred=predict(lasso.mod,s=4,newx=x)
+mean((lasso.pred-y)^2)
+out=glmnet(x,y,alpha=1,lambda=grid)
+lasso.coef=predict(lasso.mod,type="coefficients",s=bestlam)[1:16,]
+lasso.coef
+```
+The provision of Drinking water and Sanitization facilities are having a positive effect on HALE among Health Infrastructures. On the negative side, the population dying due to poisoning, which could be linked to prevalent toxicity and thus indirectly to infrastructure is relevant. Poisoning could also be linked to health behaviours. 
+Among health behaviours, only high BMI has an impact, a negative impact on HALE. Tobacco and Alcohol are suppressed to zero values.
+Tuberculosis, Cancer and other non-communicable diseases, infant mortality, and neonatal mortality have an inverse relaionship with HALE.
+
+LASSO results do not show any difference in factors affecting HALE and Life expectancy at birth.
+
+#### Lasso for Life Expectancy
+```{r}
+set.seed(22)
+trainlasso<-trainfullNA
+trainlasso$Location<-trainlasso$HALE<-NULL #Removing dependent variables and non-numeric values
+x=model.matrix(LifeExpectancy~.,trainlasso)
+y=trainlasso$LifeExpectancy
+grid=10^seq(10,-2,length=100)
+lasso.mod=glmnet(x,y,alpha=1,lambda=grid)
+dim(coef(lasso.mod))
+plot(lasso.mod)
+cv.out=cv.glmnet(x,y,alpha=1)
+plot(cv.out)
+bestlam=cv.out$lambda.min
+lasso.pred=predict(lasso.mod,s=4,newx=x)
+mean((lasso.pred-y)^2)
+out=glmnet(x,y,alpha=1,lambda=grid)
+lasso.coef=predict(lasso.mod,type="coefficients",s=bestlam)[1:16,]
+lasso.coef
+```
+The provision of Drinking water and Sanitization facilities are having an effect among Health Infrastructures. On the negative side, the population dying due to poisoning, which could be linked to prevalent toxicity and thus indirectly to infrastructure is relevant. Poisoning could also be linked to health behaviours. 
+Among health behaviours, high BMI has a negative impact on life expectancy. Tobacco is relevant as per Lasso but it surprisingly is positively related, likely an anomalous result. Alcohol has no effect.
+Tuberculosis, Cancer and other non-communicable diseases, infant mortality, and neonatal mortality have an inverse relaionship with life expectancy.
+
+### Lasso for Health Indicators. Both HALE and Life Expectancy 
+```{r}
+set.seed(27)
+
+# For  HALE
+trainshortlasso<-trainfullNA
+trainshortlasso$Location<-trainshortlasso$LifeExpectancy<-trainshortlasso$NTDs<-trainshortlasso$Poisoning<-trainshortlasso$Tuberculosis<-trainshortlasso$Under5Mortality<-trainshortlasso$NeonatalMortality<-trainshortlasso$InfantMortality<-trainshortlasso$CancerEtc<-trainshortlasso$MaternalMortality<- NULL #Removing dependent variables,  mortality and non-numeric values
+x=model.matrix(HALE~.,trainshortlasso)
+y=trainshortlasso$HALE
+grid=10^seq(10,-2,length=100)
+lasso.mod=glmnet(x,y,alpha=1,lambda=grid)
+dim(coef(lasso.mod))
+plot(lasso.mod)
+cv.out=cv.glmnet(x,y,alpha=1)
+plot(cv.out)
+bestlam=cv.out$lambda.min
+lasso.pred=predict(lasso.mod,s=4,newx=x)
+mean((lasso.pred-y)^2)
+out=glmnet(x,y,alpha=1,lambda=grid)
+lasso.coef=predict(lasso.mod,type="coefficients",s=bestlam)[1:8,]
+lasso.coef
+
+#For Life expectancy
+trainshortlasso<-trainfullNA
+trainshortlasso$Location<-trainshortlasso$HALE<-trainshortlasso$NTDs<-trainshortlasso$Poisoning<-trainshortlasso$Tuberculosis<-trainshortlasso$Under5Mortality<-trainshortlasso$NeonatalMortality<-trainshortlasso$InfantMortality<-trainshortlasso$CancerEtc<-trainshortlasso$MaternalMortality<- NULL #Removing dependent variables,  mortality and non-numeric values
+x=model.matrix(LifeExpectancy~.,trainshortlasso)
+y=trainshortlasso$LifeExpectancy
+grid=10^seq(10,-2,length=100)
+lasso.mod=glmnet(x,y,alpha=1,lambda=grid)
+dim(coef(lasso.mod))
+plot(lasso.mod)
+cv.out=cv.glmnet(x,y,alpha=1)
+plot(cv.out)
+bestlam=cv.out$lambda.min
+lasso.pred=predict(lasso.mod,s=4,newx=x)
+mean((lasso.pred-y)^2)
+out=glmnet(x,y,alpha=1,lambda=grid)
+lasso.coef=predict(lasso.mod,type="coefficients",s=bestlam)[1:8,]
+lasso.coef
+```
+Drinking water, sanitization and access to Clean fuel and technologies have strong positive effects on life expectancy and HAle while high BMI and tobacco have negative effects. The negative impact of obesity is almost as high as the postive impact of drinking water. 
+
+## Principal Components Analysis
+```{r}
+set.seed(8)
+trainlasso<-trainfullNA 
+trainlasso$Location<- NULL  # as PCA needs only numeric values
+pr.out=prcomp(trainlasso,scale=TRUE)
+pr.out$rotation
+biplot(pr.out,scale=0)
+pr.out$rotation=-pr.out$rotation
+pr.out$x=-pr.out$x
+biplot(pr.out,scale=0)
+pr.var=pr.out$sdev^2
+pr.var
+print("Proportion of variance explained")
+pve=pr.var/sum(pr.var)
+pve
+```
+PCA1 explains most of the variance but the results are not useful as they are spread among too many parameters. Lasso has provided us better results previously.
+
+## Random Forests
+
+### Economic Factors for HALE
+```{r}
+library(randomForest)
+set.seed (74)
+fit.regforest <- randomForest(HALE~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA, mtry = 1, importance=TRUE)
+predictregforest1 <- predict(fit.regforest, newdata = econtrainNA, n.trees =5000)
+MAPE(econtrainNA$HALE, predictregforest1) 
+predictregforest2 = predict(fit.regforest, newdata = econtestNA)
+MAPE(econtestNA$HALE, predictregforest2) 
+importance(fit.regforest)
+varImpPlot(fit.regforest)
+```
+Training error of 3.56% and test error of 5.11% on HALE with economic factors. GDP shown to have a slightly greater impact.
+
+### Economic factors for Life Expectancy
+```{r}
+fit.regforest <- randomForest(LifeExpectancy~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA, mtry = 1, importance=TRUE)
+predictregforest1 <- predict(fit.regforest, newdata = econtrainNA, n.trees =5000)
+MAPE(econtrainNA$LifeExpectancy, predictregforest1) 
+predictregforest2 = predict(fit.regforest, newdata = econtestNA)
+MAPE(econtestNA$LifeExpectancy, predictregforest2) 
+importance(fit.regforest)
+varImpPlot(fit.regforest)
+```
+Training error of 3.50% and test error of 5.08% on Life expectancy with economic factors. GDP shown to have a slightly greater impact.
+No differences in results for HALE and Life expectancy
+
+#### Health Infrastructure For HALE
+```{r}
+library(randomForest)
+set.seed (74)
+fit.regforest <- randomForest(HALE~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA, mtry = 2, importance=TRUE)
+predictregforest1 <- predict(fit.regforest, newdata = trainmainNA, n.trees =5000)
+MAPE(trainmainNA$HALE, predictregforest1) 
+predictregforest2 = predict(fit.regforest, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictregforest2) 
+importance(fit.regforest)
+varImpPlot(fit.regforest)
+```
+Training error and test errors are both very low.
+
+#### Health Infrastructure For Life Expectancy
+```{r}
+set.seed (73)
+fit.regforest <- randomForest(LifeExpectancy~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA, mtry = 2, importance=TRUE)
+predictregforest1 <- predict(fit.regforest, newdata = trainmainNA, n.trees =5000)
+MAPE(trainmainNA$LifeExpectancy, predictregforest1) 
+predictregforest2 = predict(fit.regforest, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictregforest2) 
+importance(fit.regforest)
+varImpPlot(fit.regforest)
+```
+Both training and test errors are very low.
+
+#### Health Behaviours For HALE
+```{r}
+set.seed (74)
+fit.regforest <- randomForest(HALE~Alcohol+Tobacco+BMI30Plus,data=trainfullNA, mtry = 2, importance=TRUE)
+predictregforest1 <- predict(fit.regforest, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$HALE, predictregforest1) 
+predictregforest2 = predict(fit.regforest, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictregforest2) 
+importance(fit.regforest)
+varImpPlot(fit.regforest)
+```
+Training and test errors are quite respectably low.
+
+#### Health Behaviours For Life Expectancy
+```{r}
+set.seed (74)
+fit.regforest <- randomForest(LifeExpectancy~Alcohol+Tobacco+BMI30Plus,data=trainfullNA, mtry = 2, importance=TRUE)
+predictregforest1 <- predict(fit.regforest, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$LifeExpectancy, predictregforest1) 
+predictregforest2 = predict(fit.regforest, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictregforest2)
+importance(fit.regforest)
+varImpPlot(fit.regforest)
+```
+Training and test errors are very low. 
+
+## Bagging 
+
+### Bagging for Health Infrastructure
+```{r}
+# Actual beginning of bagging code 
+
+fit.bag <- randomForest(HALE~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA, mtry = 3, importance=TRUE) #mtr=number of parameters for bagging
+predictbag1 <- predict(fit.bag, newdata = trainmainNA, n.trees =5000)
+MAPE(trainmainNA$HALE, predictbag1) 
+predictbag2 = predict(fit.bag, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictbag2)
+importance(fit.bag)
+varImpPlot(fit.bag)
+
+fit.bag <- randomForest(LifeExpectancy~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA, mtry = 3, importance=TRUE) #mtr=number of parameters for bagging
+predictbag1 <- predict(fit.bag, newdata = trainmainNA, n.trees =5000)
+MAPE(trainmainNA$LifeExpectancy, predictbag1) 
+predictbag2 = predict(fit.bag, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictbag2)
+importance(fit.bag)
+varImpPlot(fit.bag)
+
+```
+The training errors very low for both HALE and Life expectancy
+There is some difference observed in factors with basic sanitization being more important for HALE than drinking water. For life expectancy at birth, drinking water has the larger effect.
+
+### Bagging for Health Behaviours
+```{r}
+fit.bag <- randomForest(HALE~Alcohol+BMI30Plus+Tobacco,data=trainfullNA, mtry = 3, importance=TRUE) #mtr=number of parameters for bagging
+predictbag1 <- predict(fit.bag, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$HALE, predictbag1) 
+predictbag2 = predict(fit.regforest, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictbag2)
+importance(fit.bag)
+varImpPlot(fit.bag)
+
+fit.bag <- randomForest(LifeExpectancy~Alcohol+BMI30Plus+Tobacco,data=trainfullNA, mtry = 3, importance=TRUE) #mtr=number of parameters for bagging
+predictbag1 <- predict(fit.bag, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$LifeExpectancy, predictbag1) 
+predictbag2 = predict(fit.regforest, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictbag2)
+importance(fit.bag)
+varImpPlot(fit.bag)
+
+```
+Bagging indicates high BMI to be the most important health behaviour for healthy life expectancy as well as life expectancy at birth but life expectancy at birth is affected more than HALE by substance abuse:alcohol and tobacco.
+
+##Bagging combined model of Health behaviour and Health infrastructure
+```{r}
+fit.bag <- randomForest(HALE~Alcohol+BMI30Plus+Tobacco+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA, mtry = 6, importance=TRUE) #mtr=number of parameters for bagging
+predictbag1 <- predict(fit.bag, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$HALE, predictbag1) 
+predictbag2 = predict(fit.regforest, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictbag2)
+importance(fit.bag)
+varImpPlot(fit.bag)
+
+fit.bag <- randomForest(LifeExpectancy~Alcohol+BMI30Plus+Tobacco+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA, mtry = 3, importance=TRUE) #mtr=number of parameters for bagging
+predictbag1 <- predict(fit.bag, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$LifeExpectancy, predictbag1) 
+predictbag2 = predict(fit.regforest, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictbag2)
+importance(fit.bag)
+varImpPlot(fit.bag)
+```
+When bagging both health infrastructure and behaviours, health infrastructure appears to have the much larger effect with all three parameters being ahead of health behaviour parameters. Basic sanitization has largest impact in infra and obesity has highest impact among behaviours.
+
+##Boosting
+
+#### With Economic Data
+```{r}
+library(gbm)
+set.seed(8)
+fit.boost=gbm(HALE~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+print("Training error is:")
+predictboost1 <- predict(fit.boost, newdata = econtrainNA, n.trees =5000)
+MAPE(econtrainNA$HALE, predictboost1)
+print("Test error is:")
+predictboost2 = predict(fit.boost, newdata = econtestNA)
+MAPE(econtestNA$HALE, predictboost2) 
+
+fit.boost=gbm(LifeExpectancy~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+print("Training error is:")
+predictboost1 <- predict(fit.boost, newdata = econtrainNA, n.trees =5000)
+MAPE(econtrainNA$LifeExpectancy, predictboost1)
+print("Test error is:")
+predictboost2 = predict(fit.boost, newdata = econtestNA)
+MAPE(econtestNA$LifeExpectancy, predictboost2) 
+```
+The training error is extremely low but the test error is comparatively higher.
+
+#### With Health Infrastructure on both HALE and Life expectancy
+```{r}
+
+fit.boost=gbm(HALE~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+predictboost1 <- predict(fit.boost, newdata = trainmainNA, n.trees =5000)
+MAPE(trainmainNA$HALE, predictboost1) 
+predictboost2 = predict(fit.boost, newdata = testmainNA)
+MAPE(testmainNA$HALE, predictboost2) 
+
+fit.boost=gbm(LifeExpectancy~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+print("Training error is:")
+predictboost1 <- predict(fit.boost, newdata = trainmainNA, n.trees =5000)
+MAPE(trainmainNA$LifeExpectancy, predictboost1)
+print("Test error is:")
+predictboost2 = predict(fit.boost, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, predictboost2) 
+```
+Basic sanitization is most important followed by drinking water. The error rates are low with an extremely low training error and a low test error.  
+
+#### With Health Behaviours and Health infrastructure both
+```{r}
+fit.boost=gbm(HALE~Tobacco+Alcohol+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+print("Training error is:")
+predictboost1 <- predict(fit.boost, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$HALE, predictboost1) 
+print("Test error is:")
+predictboost2 = predict(fit.boost, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictboost2) 
+
+fit.boost=gbm(LifeExpectancy~Tobacco+Alcohol+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+print("Training error is:")
+predictboost1 <- predict(fit.boost, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$LifeExpectancy, predictboost1)
+print("Test error is:")
+predictboost2 = predict(fit.boost, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictboost2) 
+```
+The effect of health infrastructure is the greatest with basic sanitization and drinking water having the greatest effect. There is some difference observed in the ordering of factors affecting HALE and Life Expectancy but differences are not major. Test errors are in the low single digits and training errors are nearly zero. 
+
+#### Health Behaviours
+```{r}
+fit.boost=gbm(HALE~Tobacco+Alcohol+BMI30Plus,data=trainfullNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+predictboost1 <- predict(fit.boost, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$HALE, predictboost1) 
+predictboost2 = predict(fit.boost, newdata = testfullNA)
+MAPE(testfullNA$HALE, predictboost2) 
+
+fit.boost=gbm(LifeExpectancy~Tobacco+Alcohol+BMI30Plus,data=trainfullNA,distribution="gaussian",n.trees=5000,interaction.depth=4)
+summary(fit.boost)
+print("Training error is:")
+predictboost1 <- predict(fit.boost, newdata = trainfullNA, n.trees =5000)
+MAPE(trainfullNA$LifeExpectancy, predictboost1)
+print("Test error is:")
+predictboost2 = predict(fit.boost, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, predictboost2) 
+```
+Boosting gives excellent performance with very low error rates.Obesity and alcohol are most important behaviours.
+
+##Support Vector machines
+
+####For Infrastructure for both HALE and Life Expectancy
+```{r}
+library(e1071)
+set.seed(11)
+# Fit support vector machine with linear kernel for HALE
+svm.model=svm(HALE~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA,kernel="linear",cost=0.38)
+summary(svm.model)
+#We re ran at 0.38 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = trainmainNA)
+MAPE(trainmainNA$HALE, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = testmainNA)
+MAPE(testmainNA$HALE, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,HALE~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.38
+
+# Fit support vector machine with linear kernel for Life Expectancy
+svm.model=svm(LifeExpectancy~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA,kernel="linear",cost=0.75)
+summary(svm.model)
+#We re ran at 0.75 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = trainmainNA)
+MAPE(trainmainNA$LifeExpectancy, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = testmainNA)
+MAPE(testmainNA$LifeExpectancy, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,LifeExpectancy~DrinkingWater+BasicSanitization+CleanTechFuel,data=trainmainNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.75
+```
+The training and test error rates fall in similar ranges and are slightly lower for HALE than Life Expectancy. At less than 4.5%, the prediction performance is good.
+
+#### Using SVM for Health Behaviours
+```{r}
+set.seed(11)
+# Fit support vector machine with linear kernel for HALE
+svm.model=svm(HALE~Tobacco+Alcohol+BMI30Plus,data=trainfullNA,kernel="linear",cost=0.01)
+summary(svm.model)
+#We re ran at 0.01 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = trainfullNA)
+MAPE(trainfullNA$HALE, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = testfullNA)
+MAPE(testfullNA$HALE, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,HALE~Tobacco+Alcohol+BMI30Plus,data=trainfullNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.01
+
+# Fit support vector machine with linear kernel for Life Expectancy
+svm.model=svm(LifeExpectancy~Tobacco+Alcohol+BMI30Plus,data=trainfullNA,kernel="linear",cost=0.01)
+summary(svm.model)
+#We re ran at 0.01 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = trainfullNA)
+MAPE(trainfullNA$LifeExpectancy, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,LifeExpectancy~Tobacco+Alcohol+BMI30Plus,data=trainfullNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.01
+```
+Training error rate for Health Behaviours was worse than for health infrastructure. HALE was predicted far more accurately at 6.97% and 6.38% error rates for training and test sets respectively. Life expectancy was predicted slightly less accurately at 7.15% and 6.65% error rates.
+
+#### SVM For both health behaviours and health infrastructure
+```{r}
+set.seed(11)
+# Fit support vector machine with linear kernel for HALE
+svm.model=svm(HALE~Tobacco+Alcohol+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA,kernel="linear",cost=0.75)
+summary(svm.model)
+#We re ran at 0.75 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = trainfullNA)
+MAPE(trainfullNA$HALE, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = testfullNA)
+MAPE(testfullNA$HALE, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,HALE~Tobacco+Alcohol+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.75
+
+# Fit support vector machine with linear kernel for Life Expectancy
+svm.model=svm(LifeExpectancy~Tobacco+Alcohol+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA,kernel="linear",cost=1.86)
+summary(svm.model)
+#We re ran at 1.86instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = trainfullNA)
+MAPE(trainfullNA$LifeExpectancy, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = testfullNA)
+MAPE(testfullNA$LifeExpectancy, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,LifeExpectancy~Tobacco+Alcohol+BMI30Plus+DrinkingWater+BasicSanitization+CleanTechFuel,data=trainfullNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 1.86
+```
+### SVM for Economic Factors
+```{r}
+# Fit support vector machine with linear kernel for HALE
+svm.model=svm(HALE~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA,kernel="linear",cost=0.01)
+summary(svm.model)
+#We re ran at 0.01 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = econtrainNA)
+MAPE(econtrainNA$HALE, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = econtestNA)
+MAPE(econtestNA$HALE, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,HALE~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.01
+
+# Fit support vector machine with linear kernel for Life Expectancy
+svm.model=svm(LifeExpectancy~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA,kernel="linear",cost=0.01)
+summary(svm.model)
+#We re ran at 0.38 instead of initial 0.1 based on tune.out results
+
+print("Training error rate is")
+prediction = predict(svm.model, newdata = econtrainNA)
+MAPE(econtrainNA$LifeExpectancy, prediction) 
+
+print("Test error rate is")
+prediction = predict(svm.model, newdata = econtestNA)
+MAPE(econtestNA$LifeExpectancy, prediction) 
+
+# Using Tune to optimize cost
+
+tune.out=tune(svm,LifeExpectancy~GDP_currentUSD+HealthExpGDPperc,data=econtrainNA,kernel="linear",ranges=list(cost=seq(0.01,10,0.37)))
+summary(tune.out)
+#The lowest error rate is at cost of 0.01
+```
+Though the economic data works better with SVM than linear regressuion, the error rates are still higher than for health infrastructure and behaviour.
+
+## Clustering
+
+###K-Means Clustering
+```{r}
+vec=c("cyan","red","black","purple","green","black","gold","orange","pink","purple")
+trainfullNA$Location<-NULL
+km.out=kmeans(trainfullNA,10,nstart=20)
+table(km.out$cluster)
+plot(trainfullNA,col=vec,main="K-Means clustering results with K=10",pch=12,cex=3)
+```
+### Hierarchial
+
+```{r}
+alka=as.numeric(unlist(trainmainNA))
+xsc=scale(alka)
+hc.complete=hclust(dist(xsc),method="complete")
+par(mfrow=c(1,3))
+plot(hc.complete,main="Complete Linkage",cex=1)
+summary(hc.complete)
+
+alka=as.numeric(unlist(econtrainNA))
+xsc=scale(alka)
+hc.complete=hclust(dist(xsc),method="complete")
+par(mfrow=c(1,3))
+plot(hc.complete,main="Complete Linkage",cex=1)
+summary(hc.complete)
+```
+
