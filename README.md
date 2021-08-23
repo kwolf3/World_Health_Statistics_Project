@@ -1,6 +1,6 @@
 # World_Health_Statistics_Project
 
-This project utilizes statistical learning to answer a number of research questions regarding world health. To see the final project deliverables including original datasets, final datasets, code for the models, and the final report, please select the folder labeled IS517-Wolf_Choudhry-Final_Project_Deliverables.
+This project utilizes statistical learning to answer a number of research questions regarding world health. To see the final project deliverables including original datasets, final datasets, code for the models (Rmd and PDF), presentation slides (PDF), and the final report (PDF and docx), please select the folder labeled IS517-Wolf_Choudhry-Final_Project_Deliverables.
 
 For this project, we focused on three research questions applied in the context of countries of the world:
 
